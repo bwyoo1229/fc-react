@@ -9,25 +9,7 @@ function User({ user }) {
     </div>
   );
 }
-function UserList() {
-  const users = [
-    {
-      id: 1,
-      username: 'velopert',
-      email: 'public.velopert@gmail.com',
-    },
-    {
-      id: 2,
-      username: 'bwyoo1229',
-      email: 'bwyoo1229@gmail.com',
-    },
-    {
-      id: 3,
-      username: 'liz',
-      email: 'liz@example.com',
-    },
-  ];
-
+function UserList({ users }) {
   // Each child in a list should have a unique "key" prop.
   // 효율적인 re-rendering을 위해서 각 배열의 고유한 key 값을 지정해주어야 한다.
   // re-rendering 할때 key 값을 통해서 객체들을 관리하고 있기 때문에 배열에서 특정 객체의 추가/ 삭제가 효율적으로 된다.
