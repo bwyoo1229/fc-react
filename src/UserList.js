@@ -1,21 +1,8 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
-// 하나의 컴포넌트 파일에 두개의 컴포넌트를 만들어도 상관 없다
-// props를 받아올때 비구조화 할당 이용
-function User({ user, onRemove, onToggle }) {
+// React.memo를 사용한 최적화
+const User = React.memo(function User({ user, onRemove, onToggle }) {
   const { username, email, id, active } = user;
-
-  // deps의 값이 설정되거나 바뀔 때 마다 호출이 됨
-  useEffect(() => {
-    console.log('user 값이 설정됨');
-    console.log(user);
-
-    // unmount
-    return () => {
-      console.log('user값이 바뀌기 전');
-      console.log(user);
-    };
-  }, [user]); // useEffect에서 사용하고 있는 값이 있다면 deps에 꼭 추가해주어야 한다.
 
   return (
     <div>
@@ -33,7 +20,8 @@ function User({ user, onRemove, onToggle }) {
       <button onClick={() => onRemove(id)}>삭제</button>
     </div>
   );
-}
+});
+
 function UserList({ users, onRemove, onToggle }) {
   // Each child in a list should have a unique "key" prop.
   // 효율적인 re-rendering을 위해서 각 배열의 고유한 key 값을 지정해주어야 한다.
@@ -51,4 +39,5 @@ function UserList({ users, onRemove, onToggle }) {
   );
 }
 
-export default UserList;
+// React.memo로 export 하는 component를 감싸주면 props가 바뀌었을 때만 re-rendering 한다.
+export default React.memo(UserList, (prevProps, nextProps) => nextProps.users === prevProps.users);

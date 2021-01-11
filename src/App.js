@@ -27,7 +27,7 @@ function App() {
         [name]: value,
       });
     },
-    [inputs],
+    [inputs]
   );
 
   // 배열을 컴포넌트의 상태로써 관리하는 법
@@ -61,29 +61,25 @@ function App() {
       id: nextId.current,
       ...inputs,
     };
-    setUsers([...users, user]);
+
+    // 업데이트 함수를 넣어주면 dependency를 없앨 수 있다.
+    setUsers((users) => [...users, user]);
     setInputs({
       username: '',
       email: '',
     });
     nextId.current += 1;
-  }, [inputs, users]);
+  }, [inputs]);
 
   // 배열의 요소를 제거할때 불변성을 유지하기 위해서 filter 함수를 사용해준다.
-  const onRemove = useCallback(
-    (id) => {
-      setUsers(users.filter((user) => user.id !== id));
-    },
-    [users],
-  );
+  const onRemove = useCallback((id) => {
+    setUsers((users) => users.filter((user) => user.id !== id));
+  }, []);
 
   // 배열의 요소를 업데이트 할때 불변성을 유지하기 위해서 map 함수를 사용해준다.
-  const onToggle = useCallback(
-    (id) => {
-      setUsers(users.map((user) => (user.id === id ? { ...user, active: !user.active } : user)));
-    },
-    [users],
-  );
+  const onToggle = useCallback((id) => {
+    setUsers((users) => users.map((user) => (user.id === id ? { ...user, active: !user.active } : user)));
+  }, []);
 
   // App이 렌더링 될 때 특정 값이 변화할 때만 원하는 함수 호출하기
   // users가 바뀔때만 함수가 호출됨. (deps 값)
