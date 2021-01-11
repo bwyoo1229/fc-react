@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useCallback } from 'react';
 import CreateUser from './CreateUser';
 import UserList from './UserList';
 
@@ -16,13 +16,19 @@ function App() {
 
   const { username, email } = inputs;
 
-  const onChange = (e) => {
-    const { name, value } = e.target;
-    setInputs({
-      ...inputs,
-      [name]: value,
-    });
-  };
+  // useCallback
+  // onChange 함수는 inputs가 바뀔 때만 함수가 새로 만들어진다.
+  // inputs가 바뀌지 않으면 기존의 함수를 사용한다.
+  const onChange = useCallback(
+    (e) => {
+      const { name, value } = e.target;
+      setInputs({
+        ...inputs,
+        [name]: value,
+      });
+    },
+    [inputs],
+  );
 
   // 배열을 컴포넌트의 상태로써 관리하는 법
   // useState로 감싸주면 된다.
@@ -50,7 +56,7 @@ function App() {
   // useRef로 값은 변화해도 component가 re-rendering 되는 것을 막을 수 있다.
   const nextId = useRef(4);
 
-  const onCreate = () => {
+  const onCreate = useCallback(() => {
     const user = {
       id: nextId.current,
       ...inputs,
@@ -61,17 +67,23 @@ function App() {
       email: '',
     });
     nextId.current += 1;
-  };
+  }, [inputs, users]);
 
   // 배열의 요소를 제거할때 불변성을 유지하기 위해서 filter 함수를 사용해준다.
-  const onRemove = (id) => {
-    setUsers(users.filter((user) => user.id !== id));
-  };
+  const onRemove = useCallback(
+    (id) => {
+      setUsers(users.filter((user) => user.id !== id));
+    },
+    [users],
+  );
 
   // 배열의 요소를 업데이트 할때 불변성을 유지하기 위해서 map 함수를 사용해준다.
-  const onToggle = (id) => {
-    setUsers(users.map((user) => (user.id === id ? { ...user, active: !user.active } : user)));
-  };
+  const onToggle = useCallback(
+    (id) => {
+      setUsers(users.map((user) => (user.id === id ? { ...user, active: !user.active } : user)));
+    },
+    [users],
+  );
 
   // App이 렌더링 될 때 특정 값이 변화할 때만 원하는 함수 호출하기
   // users가 바뀔때만 함수가 호출됨. (deps 값)
