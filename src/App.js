@@ -25,16 +25,19 @@ function App() {
       id: 1,
       username: 'velopert',
       email: 'public.velopert@gmail.com',
+      active: true,
     },
     {
       id: 2,
       username: 'bwyoo1229',
       email: 'bwyoo1229@gmail.com',
+      active: false,
     },
     {
       id: 3,
       username: 'liz',
       email: 'liz@example.com',
+      active: false,
     },
   ]);
 
@@ -59,10 +62,15 @@ function App() {
     setUsers(users.filter((user) => user.id !== id));
   };
 
+  // 배열의 요소를 업데이트 할때 불변성을 유지하기 위해서 map 함수를 사용해준다.
+  const onToggle = (id) => {
+    setUsers(users.map((user) => (user.id === id ? { ...user, active: !user.active } : user)));
+  };
+
   return (
     <>
       <CreateUser username={username} email={email} onChange={onChange} onCreate={onCreate} />
-      <UserList users={users} onRemove={onRemove} />
+      <UserList users={users} onRemove={onRemove} onToggle={onToggle} />
     </>
   );
 }
