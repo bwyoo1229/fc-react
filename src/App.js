@@ -54,10 +54,15 @@ function App() {
     nextId.current += 1;
   };
 
+  // 배열의 요소를 제거할때 불변성을 유지하기 위해서 filter 함수를 사용해준다.
+  const onRemove = (id) => {
+    setUsers(users.filter((user) => user.id !== id));
+  };
+
   return (
     <>
       <CreateUser username={username} email={email} onChange={onChange} onCreate={onCreate} />
-      <UserList users={users} />
+      <UserList users={users} onRemove={onRemove} />
     </>
   );
 }
