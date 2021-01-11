@@ -1,21 +1,32 @@
-import React, { useState } from 'react';
+import React, { useReducer } from 'react';
+
+// 상태 업데이트 로직이 component 밖에 있다.
+// dispatch로 넘겨주는 인자가 action 으로 들어간다
+function reducer(state, action) {
+  switch (action.type) {
+    case 'INCREMENT':
+      return state + 1;
+    case 'DECREMENT':
+      return state - 1;
+    default:
+      throw new Error('Unhandled action');
+  }
+}
 
 function Counter() {
-  // const numberState = useState(0);
-  // const number = numberState[0];
-  // const setNumber = numberState[1];
-  // useState 함수는 배열([state, setState])을 반환 기본값 (state)를 parameter로 넣어줘야한다.
-  const [number, setNumber] = useState(0);
-
+  // [state, dispatch]
+  const [number, dispatch] = useReducer(reducer, 0);
   const onIncrease = () => {
-    // 다음 업데이트할 값을 넣어줌
-    // 어떻게 업데이트할지 함수 (업데이트 함수)를 넣어줄 수도 있음 -> 최적화
-    // setNumber(number => number + 1);
-    setNumber(number + 1);
+    // onIncrease가 불리면 dispatch 함수를 통해 인자로 넘겨주는 값과 함께 action을 발생시킨다.
+    dispatch({
+      type: 'INCREMENT',
+    });
   };
 
   const onDecrease = () => {
-    setNumber(number - 1);
+    dispatch({
+      type: 'DECREMENT',
+    });
   };
 
   return (
