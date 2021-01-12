@@ -8,15 +8,10 @@ const reducer = (state, action) => {
         [action.name]: action.value,
       };
     case 'RESET':
-      return {
-        username: '',
-        email: '',
-      };
-    // Optimized Code
-    // return Object.keys(state).reduce((acc, current) => {
-    //   acc[current] = '';
-    //   return acc;
-    // }, {});
+      return Object.keys(state).reduce((acc, current) => {
+        acc[current] = '';
+        return acc;
+      }, {});
     default:
       throw new Error('Unhandled Action');
   }

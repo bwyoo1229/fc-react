@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { UserDispatch } from './App';
-// React.memo를 사용한 최적화
+
 const User = React.memo(function User({ user }) {
   const { username, email, id, active } = user;
   const dispatch = useContext(UserDispatch);
