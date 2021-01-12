@@ -1,14 +1,44 @@
-import { useState, useCallback } from 'react';
+import { useReducer, useCallback } from 'react';
+
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'CHANGE':
+      return {
+        ...state,
+        [action.name]: action.value,
+      };
+    case 'RESET':
+      return {
+        username: '',
+        email: '',
+      };
+    // Optimized Code
+    // return Object.keys(state).reduce((acc, current) => {
+    //   acc[current] = '';
+    //   return acc;
+    // }, {});
+    default:
+      throw new Error('Unhandled Action');
+  }
+};
 
 const useInputs = (initialForm) => {
-  const [form, setForm] = useState(initialForm);
+  const [form, dispatch] = useReducer(reducer, initialForm);
 
   const onChange = useCallback((e) => {
     const { name, value } = e.target;
-    setForm((form) => ({ ...form, [name]: value }));
+    dispatch({
+      type: 'CHANGE',
+      name,
+      value,
+    });
   }, []);
 
-  const reset = useCallback(() => setForm(initialForm), [initialForm]);
+  const reset = useCallback(() => {
+    dispatch({
+      type: 'RESET',
+    });
+  }, []);
 
   return [form, onChange, reset];
 };
