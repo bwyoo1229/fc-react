@@ -1,38 +1,19 @@
-import React, { useState, useRef, useMemo, useCallback } from 'react';
+import React, { useReducer, useRef, useMemo, useCallback } from 'react';
 import CreateUser from './CreateUser';
 import UserList from './UserList';
 
-function countActiveUsers(users) {
+const countActiveUsers = (users) => {
   console.log('활성 사용자 수를 세는중...');
 
   return users.filter((user) => user.active).length;
-}
+};
 
-function App() {
-  const [inputs, setInputs] = useState({
+const initialState = {
+  inputs: {
     username: '',
     email: '',
-  });
-
-  const { username, email } = inputs;
-
-  // useCallback
-  // onChange 함수는 inputs가 바뀔 때만 함수가 새로 만들어진다.
-  // inputs가 바뀌지 않으면 기존의 함수를 사용한다.
-  const onChange = useCallback(
-    (e) => {
-      const { name, value } = e.target;
-      setInputs({
-        ...inputs,
-        [name]: value,
-      });
-    },
-    [inputs]
-  );
-
-  // 배열을 컴포넌트의 상태로써 관리하는 법
-  // useState로 감싸주면 된다.
-  const [users, setUsers] = useState([
+  },
+  users: [
     {
       id: 1,
       username: 'velopert',
@@ -51,45 +32,89 @@ function App() {
       email: 'liz@example.com',
       active: false,
     },
-  ]);
+  ],
+};
 
-  // useRef로 값은 변화해도 component가 re-rendering 되는 것을 막을 수 있다.
+function reducer(state, action) {
+  switch (action.type) {
+    case 'CHANGE_INPUT':
+      return {
+        ...state,
+        inputs: {
+          ...state.inputs,
+          [action.name]: action.value,
+        },
+      };
+    case 'CREATE_USER':
+      return {
+        inputs: initialState.inputs,
+        users: [...state.users, action.user],
+      };
+    case 'TOGGLE_USER':
+      return {
+        ...state,
+        // !연산자 이용해서 값 반전하는 방법으로 toggle
+        users: state.users.map((user) => (user.id === action.id ? { ...user, active: !user.active } : user)),
+      };
+    case 'REMOVE_USER':
+      return {
+        ...state,
+        // 일치 하지 않는 것만 남음 (일치하는 것은 remove 됨)
+        users: state.users.filter((user) => user.id !== action.id),
+      };
+    default:
+      throw new Error('Unhandled action');
+  }
+}
+
+function App() {
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const { username, email } = state.inputs;
+  const { users } = state;
   const nextId = useRef(4);
 
-  const onCreate = useCallback(() => {
-    const user = {
-      id: nextId.current,
-      ...inputs,
-    };
-
-    // 업데이트 함수를 넣어주면 dependency를 없앨 수 있다.
-    setUsers((users) => [...users, user]);
-    setInputs({
-      username: '',
-      email: '',
+  const onChange = useCallback((e) => {
+    const { name, value } = e.target;
+    dispatch({
+      type: 'CHANGE_INPUT',
+      name,
+      value,
     });
+  }, []);
+
+  const onCreate = useCallback(() => {
+    dispatch({
+      type: 'CREATE_USER',
+      user: {
+        id: nextId.current,
+        username,
+        email,
+      },
+    });
+
     nextId.current += 1;
-  }, [inputs]);
+  }, [username, email]);
 
-  // 배열의 요소를 제거할때 불변성을 유지하기 위해서 filter 함수를 사용해준다.
-  const onRemove = useCallback((id) => {
-    setUsers((users) => users.filter((user) => user.id !== id));
-  }, []);
-
-  // 배열의 요소를 업데이트 할때 불변성을 유지하기 위해서 map 함수를 사용해준다.
   const onToggle = useCallback((id) => {
-    setUsers((users) => users.map((user) => (user.id === id ? { ...user, active: !user.active } : user)));
+    dispatch({
+      type: 'TOGGLE_USER',
+      id,
+    });
   }, []);
 
-  // App이 렌더링 될 때 특정 값이 변화할 때만 원하는 함수 호출하기
-  // users가 바뀔때만 함수가 호출됨. (deps 값)
-  // component 성능 최적화
+  const onRemove = useCallback((id) => {
+    dispatch({
+      type: 'REMOVE_USER',
+      id,
+    });
+  }, []);
+
   const count = useMemo(() => countActiveUsers(users), [users]);
 
   return (
     <>
       <CreateUser username={username} email={email} onChange={onChange} onCreate={onCreate} />
-      <UserList users={users} onRemove={onRemove} onToggle={onToggle} />
+      <UserList users={users} onToggle={onToggle} onRemove={onRemove} />
       <div>활성 사용자 수: {count}</div>
     </>
   );
