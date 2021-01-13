@@ -1,10 +1,9 @@
 import React, { useReducer, useMemo, createContext } from 'react';
+import produce from 'immer';
 import CreateUser from './CreateUser';
 import UserList from './UserList';
 
 const countActiveUsers = (users) => {
-  console.log('활성 사용자 수를 세는중...');
-
   return users.filter((user) => user.active).length;
 };
 
@@ -31,24 +30,23 @@ const initialState = {
   ],
 };
 
+// 업데이트 로직이 까다로운 경우에는 immer를 사용하는 것을 고려해보자
 function reducer(state, action) {
   switch (action.type) {
     case 'CREATE_USER':
-      return {
-        users: [...state.users, action.user],
-      };
+      return produce(state, (draft) => {
+        draft.users.push(action.user);
+      });
     case 'TOGGLE_USER':
-      return {
-        ...state,
-        // !연산자 이용해서 값 반전하는 방법으로 toggle
-        users: state.users.map((user) => (user.id === action.id ? { ...user, active: !user.active } : user)),
-      };
+      return produce(state, (draft) => {
+        const user = draft.users.find((user) => action.id === user.id);
+        user.active = !user.active;
+      });
     case 'REMOVE_USER':
-      return {
-        ...state,
-        // 일치 하지 않는 것만 남음 (일치하는 것은 remove 됨)
-        users: state.users.filter((user) => user.id !== action.id),
-      };
+      return produce(state, (draft) => {
+        const index = draft.users.findIndex((user) => user.id === action.id);
+        draft.users.splice(index, 1);
+      });
     default:
       throw new Error('Unhandled action');
   }
